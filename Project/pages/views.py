@@ -20,26 +20,16 @@ def index(request):
 @api_view(['GET'])
 def recipes_list(request):
     recipes = list(Recipe.objects.all().values()[:2000])
-    # disp_items =  10 # request.GET.get('items') could be useful instead
-    # paginator = Paginator(recipes, disp_items)
-    # page_number = request.GET.get('page')
-    # page_obj = paginator.get_page(page_number)
     return JsonResponse(recipes, safe=False)
 
 @api_view(['GET'])
 def search(request):
     query = request.query_params.getlist('ingredients')
     recipes = list(Recipe.objects.filter(ingredients__name__in=query).annotate(recipe_count=Count('name')).order_by('-recipe_count', '-rating', '-n_ratings').values()[:2000])
-    # found_recipes = recipes.count() != 0
-    # query2 = ''
-    # for ingredient in query:
-    #     query2 += 'ingredients=' + ingredient + '&'
-    # query2 = query2[:-1]
-    # disp_items =  10 # request.GET.get('items') could be useful instead
-    # paginator = Paginator(recipes, disp_items)
-    # page_number = request.GET.get('page')
-    # page_obj = paginator.get_page(page_number)
-    return JsonResponse(recipes, safe=False)
+    if len(recipes) != 0:
+        return JsonResponse(recipes, safe=False)
+    else:
+        return JsonResponse('error', safe=False, status=404)
 
 @api_view(['GET'])
 def find_one(request):
